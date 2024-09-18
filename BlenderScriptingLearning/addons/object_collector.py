@@ -18,27 +18,35 @@ class OBJECT_OT_collector_types(bpy.types.Operator):
     def poll(cls,context):
         return len(context.scene.objects)>0
     
+    @staticmethod
+    def get_collection(name):
+        try:
+            return bpy.data.collections[name]
+        except KeyError:
+            cl = bpy.data.collections.new(name)
+            bpy.context.scene.collection.children.link(cl)
+            return cl
+    
     def execute(self,context):
-        mesh_cl = bpy.data.collections.new("MESH")
-        light_cl = bpy.data.collections.new("LIGHT")
-        camera_cl = bpy.data.collections.new("CAMERA")
-        context.scene.collection.children.link(mesh_cl)
-        context.scene.collection.children.link(light_cl)
-        context.scene.collection.children.link(camera_cl)
         for ob in context.scene.objects:
-            if ob.type == 'MESH':
-                mesh_cl.objects.link(ob)
-            elif ob.type == 'LIGHT':
-                light_cl.objects.link(ob)
-            elif ob.type == 'CAMERA':
-                camera_cl.objects.link(ob)
+            cl = self.get_collection(ob.type.title())
+            try:
+                cl.objects.link(ob)
+            except RuntimeError:
+                continue
         return {'FINISHED'}
 
 
+def draw_collector_item(self,context):
+    row = self.layout.row()
+    row.operator(OBJECT_OT_collector_types.bl_idname)
 
 def register():
     bpy.utils.register_class(OBJECT_OT_collector_types)
-
+    menu = bpy.types.VIEW3D_MT_object_context_menu
+    menu.append(draw_collector_item)
 
 def unregister():
     bpy.utils.unregister_class(OBJECT_OT_collector_types)
+    menu = bpy.types.VEW3D_MT_object_context_menu
+    menu.remove(draw_collector_item)
