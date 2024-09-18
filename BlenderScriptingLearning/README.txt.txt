@@ -1,0 +1,1 @@
+# Learning from Python Scripting in Blender by PAOLO ACAMPORA
