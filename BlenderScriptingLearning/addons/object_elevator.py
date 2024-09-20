@@ -23,9 +23,13 @@ class OBJECT_OT_elevator(bpy.types.Operator):
     
     def execute(self,context):
         for ob in context.selected_objects:
-            if ob.location.z > self.floor:
+            matrix_world = ob.matrix_world
+            #if ob.location.z > self.floor:
+            if matrix_world[2][3] > self.floor:
                 continue
-            ob.location.z =self.floor
+            #ob.location.z =self.floor
+            matrix_world[2][3] = self.floor
+            context.view_layer.update()
         return {'FINISHED'}
     
 def draw_elevator_item(self,context):
